@@ -61,16 +61,22 @@ android {
             dimension = "default"
             applicationIdSuffix = ""
             manifestPlaceholders["appName"] = "Flutter Template"
+            manifestPlaceholders["admobAppId"] =
+                System.getenv("ADMOB_ANDROID_APP_ID") ?: (project.findProperty("ADMOB_ANDROID_APP_ID") as String?) ?: ""
         }
         create("staging") {
             dimension = "default"
             applicationIdSuffix = ".stg"
             manifestPlaceholders["appName"] = "[STG] Flutter Template"
+            manifestPlaceholders["admobAppId"] =
+                System.getenv("ADMOB_ANDROID_APP_ID") ?: (project.findProperty("ADMOB_ANDROID_APP_ID") as String?) ?: ""
         }
         create("development") {
             dimension = "default"
             applicationIdSuffix = ".dev"
             manifestPlaceholders["appName"] = "[DEV] Flutter Template"
+            manifestPlaceholders["admobAppId"] =
+                System.getenv("ADMOB_ANDROID_APP_ID") ?: (project.findProperty("ADMOB_ANDROID_APP_ID") as String?) ?: ""
         }
     }
 
