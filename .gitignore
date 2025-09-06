@@ -119,6 +119,7 @@ lib/l10n/gen/
 # Local env and secrets
 .env
 .env.*
+!.env.example
 *.keystore
 android/app/*.keystore
 android/app/google-services.json
