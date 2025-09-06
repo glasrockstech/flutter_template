@@ -166,6 +166,33 @@ flutter gen-l10n --arb-dir="lib/l10n/arb"
 
 Alternatively, run `flutter run` and code generation will take place automatically.
 
+---
+
+## Environment & Credentials (.env)
+
+- Per-flavor env files are loaded at startup:
+  - development: `.env.development`
+  - staging: `.env.staging`
+  - production: `.env.production`
+- Copy `.env.example` and fill in values for each environment.
+- Keys used:
+  - `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+  - `ADMOB_ANDROID_APP_ID`, `ADMOB_IOS_APP_ID`
+  - Optional ad units: `ADMOB_BANNER_*`, `ADMOB_INTERSTITIAL_*`, `ADMOB_REWARDED_*`
+
+### Supabase
+- Supabase is initialized during `bootstrap()` if both `SUPABASE_URL` and `SUPABASE_ANON_KEY` are present.
+- See `lib/auth/` for basic email/password sign-in scaffolding.
+
+### AdMob
+- The Google Mobile Ads SDK is initialized during `bootstrap()`.
+- Android app id is injected via `manifestPlaceholders` per flavor.
+  - Provide `ADMOB_ANDROID_APP_ID` in your environment (or Gradle property) when building/running.
+  - The manifest references `${admobAppId}`.
+- iOS requires `GADApplicationIdentifier` in `ios/Runner/Info.plist`.
+  - Add your app id to `Info.plist` or wire it via build settings per scheme.
+- Optional: use `lib/ads/banner_ad_widget.dart` for a simple banner ad (reads unit IDs from `.env`).
+
 [coverage_badge]: coverage_badge.svg
 [flutter_localizations_link]: https://api.flutter.dev/flutter/flutter_localizations/flutter_localizations-library.html
 [internationalization_link]: https://flutter.dev/docs/development/accessibility-and-localization/internationalization
