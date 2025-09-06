@@ -193,6 +193,183 @@ Alternatively, run `flutter run` and code generation will take place automatical
   - Add your app id to `Info.plist` or wire it via build settings per scheme.
 - Optional: use `lib/ads/banner_ad_widget.dart` for a simple banner ad (reads unit IDs from `.env`).
 
+---
+
+## How‑To Guides
+
+### Add Supabase Auth
+
+1) Create a Supabase project and grab credentials:
+- Get your `SUPABASE_URL` and `SUPABASE_ANON_KEY` from the Supabase dashboard.
+
+2) Add credentials to env:
+- Copy `.env.example` to `.env.development` (and `.env.staging`, `.env.production` as needed).
+- Fill `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
+
+3) Initialize + wire UI:
+- Supabase is initialized in `bootstrap()` if env values are present: see `lib/bootstrap.dart`.
+- A minimal auth flow is scaffolded:
+  - `lib/auth/auth_gate.dart`: switches between signed‑out and signed‑in UI.
+  - `lib/auth/view/sign_in_page.dart`: email/password sign‑in and sign‑up.
+- To use it as your entry, set `home: const AuthGate()` in `lib/app/view/app.dart`.
+
+4) Optional (OAuth/deeplinks):
+- For Google/Apple sign‑in, configure redirect URLs (Android deep links, iOS universal links) in the Supabase dashboard and native projects.
+
+Run (dev):
+```sh
+flutter run --flavor development --target lib/main_development.dart
+```
+
+### Add Supabase Database
+
+1) Create tables and enable RLS:
+- In Supabase SQL editor, create a table and turn on Row Level Security (RLS), then add policies.
+
+Example policy (read own rows):
+```sql
+create policy "Read own" on public.todo
+  for select using (auth.uid() = user_id);
+```
+
+2) Query from Flutter:
+```dart
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+final db = Supabase.instance.client;
+final rows = await db.from('todo').select().eq('user_id', db.auth.currentUser!.id);
+```
+
+3) Suggested organization:
+- Create a small data layer per feature (e.g., `lib/todo/data/todo_api.dart`) to wrap Supabase queries.
+- Keep auth calls in `lib/auth/` and database calls per feature.
+
+### Work With .env (per flavor)
+
+1) Copy the template and create per‑flavor files:
+```sh
+cp .env.example .env.development
+cp .env.example .env.staging
+cp .env.example .env.production
+```
+
+2) Fill values:
+- Supabase: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- AdMob app IDs: `ADMOB_ANDROID_APP_ID`, `ADMOB_IOS_APP_ID`
+- Optional ad units: `ADMOB_BANNER_*`, `ADMOB_INTERSTITIAL_*`, `ADMOB_REWARDED_*`
+
+3) How env is loaded:
+- Each flavor entrypoint passes the env file:
+  - `lib/main_development.dart` → `.env.development`
+  - `lib/main_staging.dart` → `.env.staging`
+  - `lib/main_production.dart` → `.env.production`
+- `bootstrap()` loads it via `flutter_dotenv`.
+
+4) Notes:
+- `.env.*` are ignored by git; only `.env.example` is tracked.
+- On Android, some values (e.g., `ADMOB_ANDROID_APP_ID`) are read at build time via Gradle and env vars.
+
+### Add a Feature
+
+Recommended structure (feature‑first):
+```
+lib/
+  your_feature/
+    data/          # APIs, DTOs
+    repository/    # abstraction over data
+    cubit/         # state management (Bloc/Cubit)
+    view/          # pages/widgets
+```
+
+Quick start (example "profile"):
+1) Create folders: `lib/profile/{data,repository,cubit,view}`
+2) Add a Cubit: `lib/profile/cubit/profile_cubit.dart`
+3) Add a page: `lib/profile/view/profile_page.dart`
+4) Write tests in `test/profile/...`
+5) Register a route (see Routing section) and navigate to it.
+
+### Manage Routing
+
+This template ships with basic navigation; for scalable routing we recommend `go_router`.
+
+1) Add dependency:
+```yaml
+dependencies:
+  go_router: ^14.2.1
+```
+
+2) Create a router file:
+```dart
+// lib/app/router/app_router.dart
+import 'package:go_router/go_router.dart';
+import 'package:flutter_template/counter/counter.dart';
+
+final appRouter = GoRouter(
+  routes: [
+    GoRoute(path: '/', builder: (_, __) => const CounterPage()),
+    // GoRoute(path: '/profile', builder: (_, __) => const ProfilePage()),
+  ],
+);
+```
+
+3) Use MaterialApp.router:
+```dart
+// lib/app/view/app.dart
+return MaterialApp.router(
+  theme: ThemeData(useMaterial3: true),
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  routerConfig: appRouter,
+);
+```
+
+### Use Different Flavors
+
+Run commands:
+```sh
+# Development
+flutter run --flavor development --target lib/main_development.dart
+
+# Staging
+flutter run --flavor staging --target lib/main_staging.dart
+
+# Production
+flutter run --flavor production --target lib/main_production.dart
+```
+
+Platform notes:
+- Android: flavors are defined in `android/app/build.gradle.kts`.
+- iOS/macOS: select the matching Scheme in Xcode.
+- Web/desktop: flavors don’t apply; the `--target` still selects the entrypoint (and env loader).
+
+### Add AdMob Credentials
+
+1) App IDs (required):
+- Get app IDs from AdMob and put into `.env.*`:
+  - Android: `ADMOB_ANDROID_APP_ID`
+  - iOS: `ADMOB_IOS_APP_ID`
+
+2) Android wiring:
+- The app id is injected via Gradle `manifestPlaceholders` per flavor; see `android/app/build.gradle.kts` and `AndroidManifest.xml` meta‑data.
+- Ensure the env var is available to Gradle when building:
+```sh
+export ADMOB_ANDROID_APP_ID=ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy
+```
+
+3) iOS wiring:
+- Add to `ios/Runner/Info.plist`:
+```xml
+<key>GADApplicationIdentifier</key>
+<string>ca-app-pub-xxxxxxxxxxxxxxxx~zzzzzzzzzz</string>
+```
+
+4) Ad units (optional):
+- Put your banner/interstitial/rewarded unit IDs in `.env.*` (`ADMOB_BANNER_*`, etc.).
+- Use `lib/ads/banner_ad_widget.dart` as a simple example placement.
+
+5) Testing:
+- Use AdMob test unit IDs in development to comply with AdMob policies.
+
 [coverage_badge]: coverage_badge.svg
 [flutter_localizations_link]: https://api.flutter.dev/flutter/flutter_localizations/flutter_localizations-library.html
 [internationalization_link]: https://flutter.dev/docs/development/accessibility-and-localization/internationalization
