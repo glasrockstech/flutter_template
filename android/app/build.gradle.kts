@@ -62,21 +62,21 @@ android {
             applicationIdSuffix = ""
             manifestPlaceholders["appName"] = "Flutter Template"
             manifestPlaceholders["admobAppId"] =
-                System.getenv("ADMOB_ANDROID_APP_ID") ?: (project.findProperty("ADMOB_ANDROID_APP_ID") as String?) ?: ""
+                "ca-app-pub-6196560899955581~7806072209"
         }
         create("staging") {
             dimension = "default"
             applicationIdSuffix = ".stg"
             manifestPlaceholders["appName"] = "[STG] Flutter Template"
             manifestPlaceholders["admobAppId"] =
-                System.getenv("ADMOB_ANDROID_APP_ID") ?: (project.findProperty("ADMOB_ANDROID_APP_ID") as String?) ?: ""
+                "ca-app-pub-6196560899955581~7806072209"
         }
         create("development") {
             dimension = "default"
             applicationIdSuffix = ".dev"
             manifestPlaceholders["appName"] = "[DEV] Flutter Template"
             manifestPlaceholders["admobAppId"] =
-                System.getenv("ADMOB_ANDROID_APP_ID") ?: (project.findProperty("ADMOB_ANDROID_APP_ID") as String?) ?: ""
+                "ca-app-pub-6196560899955581~7806072209"
         }
     }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_template/counter/counter.dart';
+import 'package:flutter_template/features/auth/view/auth_gate.dart';
+import 'package:flutter_template/features/home/view/home_page.dart';
+import 'package:flutter_template/features/splash/view/splash_page.dart';
 import 'package:flutter_template/l10n/l10n.dart';
 
 class App extends StatelessWidget {
@@ -16,7 +18,11 @@ class App extends StatelessWidget {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const CounterPage(),
+      home: const SplashPage(),
+      routes: {
+        '/auth': (_) => const AuthGate(),
+        '/home': (_) => const HomePage(),
+      },
     );
   }
 }

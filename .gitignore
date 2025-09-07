@@ -117,9 +117,16 @@ app.*.map.json
 lib/l10n/gen/
 
 # Local env and secrets
+# Ignore all env files by default, keep example and placeholders tracked.
 .env
 .env.*
 !.env.example
+!.env
+!.env.staging
+!.env.production
+# Ignore developer-local overrides
+.env.local
+.env.*.local
 *.keystore
 android/app/*.keystore
 android/app/google-services.json
@@ -129,3 +136,7 @@ ios/Runner/GoogleService-Info.plist
 **/macos/Flutter/ephemeral/
 **/linux/Flutter/ephemeral/
 **/windows/Flutter/ephemeral/
+
+# macOS CocoaPods
+**/macos/**/Pods/
+**/macos/**/.symlinks/

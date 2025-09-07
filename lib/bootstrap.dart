@@ -45,12 +45,17 @@ Future<void> bootstrap(
   }
 
   // Initialize Supabase if credentials are present.
-  final supabaseUrl = dotenv.env['SUPABASE_URL'];
-  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+  final supabaseUrl = dotenv.isInitialized ? dotenv.env['SUPABASE_URL'] : null;
+  final supabaseAnonKey =
+      dotenv.isInitialized ? dotenv.env['SUPABASE_ANON_KEY'] : null;
   final isFlutterTest = Platform.environment['FLUTTER_TEST'] == 'true';
   if (!isFlutterTest && supabaseUrl != null && supabaseAnonKey != null) {
     try {
-      await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
+      // Avoid blocking first frame indefinitely if network hangs.
+      await Supabase.initialize(
+        url: supabaseUrl,
+        anonKey: supabaseAnonKey,
+      ).timeout(const Duration(seconds: 6));
       log('Supabase initialized');
     } catch (e, st) {
       log('Supabase init error: $e', stackTrace: st);
@@ -62,7 +67,13 @@ Future<void> bootstrap(
   // Initialize Google Mobile Ads outside of tests.
   if (!isFlutterTest) {
     try {
-      await MobileAds.instance.initialize();
+      // Non-blocking; initialization can complete in background.
+      unawaited(
+        MobileAds.instance
+            .initialize()
+            .timeout(const Duration(seconds: 4))
+            .catchError((e, st) => log('MobileAds init error: $e', stackTrace: st)),
+      );
       log('MobileAds initialized');
     } catch (e, st) {
       log('MobileAds init error: $e', stackTrace: st);

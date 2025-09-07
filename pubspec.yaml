@@ -14,9 +14,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
-  flutter_dotenv: ^5.1.0
+  flutter_dotenv: ^6.0.0
   supabase_flutter: ^2.5.8
-  google_mobile_ads: ^5.1.0
+  google_mobile_ads: ^6.0.0
 
 dev_dependencies:
   bloc_test: ^10.0.0
@@ -24,7 +24,38 @@ dev_dependencies:
     sdk: flutter
   mocktail: ^1.0.4
   very_good_analysis: ^9.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   generate: true
   uses-material-design: true
+  assets:
+    - .env
+    - .env.development
+    - .env.staging
+    - .env.production
+
+# Launcher icon generation
+flutter_launcher_icons:
+  # Generate a single icon used for all platforms by default
+  image_path: assets/app_icon.png
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  min_sdk_android: 21
+  adaptive_icon_foreground: assets/app_icon.png
+  adaptive_icon_background: "#FFFFFF"
+  # Optional: if you want per-flavor icons, uncomment and point all to the same image (or different ones)
+  # flavors:
+  #   production:
+  #     image_path: assets/app_icon.png
+  #     android: true
+  #     ios: true
+  #   staging:
+  #     image_path: assets/app_icon.png
+  #     android: true
+  #     ios: true
+  #   development:
+  #     image_path: assets/app_icon.png
+  #     android: true
+  #     ios: true

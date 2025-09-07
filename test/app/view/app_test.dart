@@ -2,14 +2,14 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter_template/app/app.dart';
-import 'package:flutter_template/counter/counter.dart';
+import 'package:flutter_template/features/splash/view/splash_page.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('App', () {
-    testWidgets('renders CounterPage', (tester) async {
+    testWidgets('renders SplashPage', (tester) async {
       await tester.pumpWidget(App());
-      expect(find.byType(CounterPage), findsOneWidget);
+      expect(find.byType(SplashPage), findsOneWidget);
     });
   });
 }
