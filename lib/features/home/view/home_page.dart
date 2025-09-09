@@ -5,6 +5,9 @@ import 'package:flutter_template/l10n/l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_template/features/auth/cubit/auth_cubit.dart';
 import 'package:flutter_template/features/settings/view/settings_page.dart';
+import 'package:flutter_template/app/router/app_router.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_template/ads/banner_ad_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,7 +38,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () async {
               await context.read<AuthCubit>().signOut();
               if (context.mounted) {
-                Navigator.of(context).pushNamedAndRemoveUntil('/auth', (r) => false);
+                context.go(AppRoutes.auth);
               }
             },
           ),
@@ -72,8 +75,7 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () async {
                     await context.read<AuthCubit>().signOut();
                     if (context.mounted) {
-                      Navigator.of(context)
-                          .pushNamedAndRemoveUntil('/auth', (r) => false);
+                      context.go(AppRoutes.auth);
                     }
                   },
                   icon: const Icon(Icons.logout),
@@ -86,26 +88,36 @@ class _HomePageState extends State<HomePage> {
           const SettingsPage(),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: l10n.homeTitle,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline),
-            selectedIcon: const Icon(Icons.person),
-            label: l10n.accountTitle,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings),
-            label: l10n.settingsTitle,
-          ),
-        ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Ad banner attached just above the nav bar, full width.
+            const BannerAdWidget(),
+            NavigationBar(
+              selectedIndex: _index,
+              onDestinationSelected: (i) => setState(() => _index = i),
+              destinations: [
+                NavigationDestination(
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home),
+                  label: l10n.homeTitle,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.person_outline),
+                  selectedIcon: const Icon(Icons.person),
+                  label: l10n.accountTitle,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.settings_outlined),
+                  selectedIcon: const Icon(Icons.settings),
+                  label: l10n.settingsTitle,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

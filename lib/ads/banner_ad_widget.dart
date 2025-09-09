@@ -1,6 +1,5 @@
-import 'dart:io' show Platform;
+import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -13,55 +12,65 @@ class BannerAdWidget extends StatefulWidget {
 }
 
 class _BannerAdWidgetState extends State<BannerAdWidget> {
-  BannerAd? _banner;
+  BannerAd? _ad;
   bool _loaded = false;
+  AnchoredAdaptiveBannerAdSize? _adaptiveSize;
+
+  String get _bannerUnitId {
+    // Fallback to Google's test unit IDs when not provided.
+    const androidTest = 'ca-app-pub-3940256099942544/6300978111';
+    const iosTest = 'ca-app-pub-3940256099942544/2934735716';
+    if (Platform.isAndroid) {
+      return dotenv.env['ADMOB_BANNER_ANDROID'] ?? androidTest;
+    }
+    return dotenv.env['ADMOB_BANNER_IOS'] ?? iosTest;
+  }
 
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) return; // AdMob is not supported on web.
-
-    final unitId = Platform.isAndroid
-        ? dotenv.env['ADMOB_BANNER_ANDROID']
-        : Platform.isIOS
-            ? dotenv.env['ADMOB_BANNER_IOS']
-            : null;
-
-    if (unitId == null || unitId.isEmpty) return;
-
-    final ad = BannerAd(
-      adUnitId: unitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) => setState(() => _loaded = true),
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-        },
-      ),
-    );
-
-    ad.load();
-    _banner = ad;
+    // Compute adaptive size after first layout to have correct width.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final mq = MediaQuery.maybeOf(context);
+      if (mq == null) return;
+      final width = mq.size.width.truncate();
+      try {
+        final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width);
+        if (!mounted) return;
+        setState(() => _adaptiveSize = size);
+        final ad = BannerAd(
+          size: size!,
+          adUnitId: _bannerUnitId,
+          listener: BannerAdListener(
+            onAdLoaded: (_) => setState(() => _loaded = true),
+            onAdFailedToLoad: (ad, error) {
+              ad.dispose();
+            },
+          ),
+          request: const AdRequest(),
+        );
+        _ad = ad..load();
+      } catch (_) {
+        // Fallback: do not render ad if size fails.
+      }
+    });
   }
 
   @override
   void dispose() {
-    _banner?.dispose();
+    _ad?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!
-        _loaded || _banner == null) {
+    if (!_loaded || _ad == null || _adaptiveSize == null) {
       return const SizedBox.shrink();
     }
     return SizedBox(
-      height: _banner!.size.height.toDouble(),
-      width: _banner!.size.width.toDouble(),
-      child: AdWidget(ad: _banner!),
+      height: _adaptiveSize!.height.toDouble(),
+      width: _adaptiveSize!.width.toDouble(),
+      child: AdWidget(ad: _ad!),
     );
   }
 }
-

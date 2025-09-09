@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_template/app/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -20,7 +22,7 @@ class _SplashPageState extends State<SplashPage> {
 
   void _goNext() {
     if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed('/auth');
+    context.go(AppRoutes.auth);
   }
 
   @override

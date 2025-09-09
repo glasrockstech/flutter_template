@@ -10,6 +10,7 @@ import 'package:flutter_template/repositories/auth_repository.dart';
 import 'package:flutter_template/repositories/user_repository.dart';
 import 'package:flutter_template/features/auth/cubit/auth_cubit.dart';
 import 'package:flutter_template/app/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_template/theme/theme_controller_provider.dart';
 
 class App extends StatefulWidget {
@@ -21,6 +22,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   late final ThemeController _themeController;
+  GoRouter? _router;
 
   @override
   void initState() {
@@ -42,17 +44,18 @@ class _AppState extends State<App> {
             ],
             child: BlocProvider(
               create: (context) => AuthCubit(context.read<AuthRepository>()),
-              child: MaterialApp(
-                theme: AppTheme.light(),
-                darkTheme: AppTheme.dark(),
-                themeMode: _themeController.mode,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-                initialRoute: AppRoutes.splash,
-                routes: {
-                  AppRoutes.splash: (_) => const SplashPage(),
-                  AppRoutes.auth: (_) => const AuthGate(),
-                  AppRoutes.home: (_) => const HomePage(),
+              child: Builder(
+                builder: (context) {
+                  _router ??= createRouter(context.read<AuthCubit>());
+                  return MaterialApp.router(
+                    theme: AppTheme.light(),
+                    darkTheme: AppTheme.dark(),
+                    themeMode: _themeController.mode,
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    routerConfig: _router!,
+                  );
                 },
               ),
             ),
