@@ -11,12 +11,17 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
+  equatable: ^2.0.5
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
   flutter_dotenv: ^6.0.0
-  supabase_flutter: ^2.5.8
+  # supabase_flutter removed in favor of Firebase
+  firebase_core: ^4.1.0
+  firebase_auth: ^6.0.2
   google_mobile_ads: ^6.0.0
+  flex_color_scheme: ^8.2.0
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   bloc_test: ^10.0.0
@@ -24,7 +29,7 @@ dev_dependencies:
     sdk: flutter
   mocktail: ^1.0.4
   very_good_analysis: ^9.0.0
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   generate: true
@@ -34,6 +39,7 @@ flutter:
     - .env.development
     - .env.staging
     - .env.production
+    - assets/app_icon.png
 
 # Launcher icon generation
 flutter_launcher_icons:

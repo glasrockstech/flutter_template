@@ -129,8 +129,18 @@ lib/l10n/gen/
 .env.*.local
 *.keystore
 android/app/*.keystore
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
+# Firebase configs (do not commit project-specific configs)
+# Android: all flavor-specific locations
+**/android/**/google-services.json
+# iOS/macOS: all targets
+**/ios/**/GoogleService-Info*.plist
+**/macos/**/GoogleService-Info*.plist
+# FlutterFire app id file (generated)
+**/firebase_app_id_file.json
+
+# If you prefer to keep firebase_options.dart private, uncomment below.
+# Note: Most templates commit this file safely.
+# lib/firebase_options.dart
 
 # Flutter desktop ephemeral
 **/macos/Flutter/ephemeral/
